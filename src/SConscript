@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 env = Environment()
 
 # See ../prerequisites.sh
-FLASH_TOOL = "sudo ./lm4tools/lm4flash/lm4flash"
+FLASH_TOOL = '''openocd -f board/ek-lm4f120xl.cfg -c "program %s verify reset exit"'''
 
 # If you have installed the toolchain from https://launchpad.net/gcc-arm-embedded,
 # edit this to point to your gcc. This compiler comes with a bare-metal C library
@@ -58,7 +58,7 @@ objdump = Builder(
 env.Append(BUILDERS={"Objdump": objdump})
 
 # Builder to flash on to Launchpad board
-flash = Builder(action="%s ${SOURCE}" % FLASH_TOOL)
+flash = Builder(action=FLASH_TOOL % "${SOURCE}")
 env.Append(BUILDERS={"Flash": flash})
 
 # Builder which uses size to show segment sizes
@@ -134,7 +134,7 @@ bin = env.Strip(target="start.bin", source=elf)
 Depends(bin, env.Size(source=elf))
 
 # Flashes the raw binary onto the board
-fd = env.Flash(target="flash", source=bin)
+fd = env.Flash(target="flash", source=elf)
 
 # Allow the user to call "scons flash" to build and flash
 fda = env.Alias("flash", fd)
